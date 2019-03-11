@@ -20,10 +20,14 @@ classdef ReNoCar < matlab.System
         CenterFrequency     = 60;
         Cascade             = 'manual';
         
-        Pairs               = {};
+        Pairs               = [];
         nPairs              = 0;
         IncludeTarget       = true;
         mChan               = 2;
+        
+        ResampleData        = [];
+        NotchData           = [];
+        CARData             = [];
     end
 
     properties(DiscreteState)
@@ -62,15 +66,20 @@ classdef ReNoCar < matlab.System
             obj.resamp = Resample('Method', obj.Method, 'SampleRate', obj.SampleRate,...
                                   'ResampleRate', obj.ResampleRate, 'L', obj.L,...
                                   'M', obj.M, 'Numerator', obj.Numerator,...
-                                  'BTA', obj.BTA);
+                                  'BTA', obj.BTA, 'DataStruct', obj.ResampleData);
+            
             [obj.L, obj.M, obj.NewSampleRate] = obj.resamp.buildCoefficients();
+            
             obj.notch = NotchFilter('SampleRate', obj.NewSampleRate,...
                                     'Bandwidth', obj.Bandwidth,...
                                     'CenterFrequency', obj.CenterFrequency,...
                                     'Cascade', obj.Cascade,...
-                                    'Harmonics', obj.Harmonics);
+                                    'Harmonics', obj.Harmonics,...
+                                    'DataStruct', obj.NotchData);
+            
             obj.pcar = CAR('Allow', obj.AllowCAR, 'Pairs', obj.Pairs,...
-                           'IncludeTarget', true, 'mChan', obj.mChan);
+                           'IncludeTarget', true, 'mChan', obj.mChan,...
+                           'DataStruct', obj.CARData);
         end
         
         function [re] = buildRePlots(obj, names, map, override)
@@ -110,6 +119,11 @@ classdef ReNoCar < matlab.System
             obj.resamp.plotTracking(t);
             obj.notch.plotTracking(t);
             obj.pcar.plotTracking(t);
+        end
+        
+        function pairs = setPairstruct(obj, tg_names, rf_names, tg_list, rf_list)
+            pairs = obj.pcar.setPairstruct(tg_names, rf_names, tg_list, rf_list);
+            obj.Pairs = pairs;
         end
     end
 

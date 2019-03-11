@@ -26,17 +26,12 @@ properties
     daq
     process
     
-    r_data
-    p_data
-    n_data
-    c_data
-    
     period
 end
 
 methods
     %% ---- Methods ---- %%
-    function self = recordTimer(info_log, period, daq, r_data, process, pars, parent, subs)
+    function self = recordTimer(info_log, period, daq, process, pars, parent, subs)
     % recordTimer 
     %   Initializes the recordTimer object
     %   Input
@@ -77,7 +72,6 @@ methods
         self.daq      = daq;
         self.info_log = info_log;
         self.period   = period;
-        self.r_data   = r_data;
         
         if nargin >= 5
             self.process = process;
@@ -109,29 +103,11 @@ methods
     %   :new_ts:                double          The new timestamp
         [raw, ts] = self.daq(self.timestamps);
         
-        f_sn = ts.b_adj_sn;
-        l_sn = ts.e_adj_sn;
-        f_sc = ts.b_seconds;
-        l_sc = ts.e_seconds;
-        
-        % Add data to struct
-        [sam, cha] = size(raw);
-        self.r_data.addDataList(mat2cell(raw,ones(1,sam),cha), f_sn:l_sn);
-        
         % Extra Processing
         if ~isempty(self.process)
-            [c, n, re] = self.process(raw.', [f_sc l_sc]);
-            [sam, cha] = size(n);
-            tch = size(c,2);
-            if ~isempty(self.p_data) && ~isempty(re)
-                self.p_data.appendDataNaNList(mat2cell(re,sam,ones(1,cha)),1);
-            end
-            if ~isempty(self.n_data) && ~isempty(n)
-                self.n_data.appendDataNaNList(mat2cell(n,sam,ones(1,cha)),1);
-            end
-            if ~isempty(self.c_data) && ~isempty(c)
-                self.c_data.appendDataNaNList(mat2cell(c,sam,ones(1,tch)),1);
-            end
+            f_sc = ts.b_seconds;
+            l_sc = ts.e_seconds;
+            self.process(raw, [f_sc l_sc]);
         end
     end
     

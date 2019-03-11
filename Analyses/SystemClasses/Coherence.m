@@ -78,6 +78,7 @@ classdef Coherence < matlab.System
             
             if override || isempty(obj.Plot)
                 plt = realmultiplot([600 length(names)*150], names, 'Name', obj.Name, 'Visible', 'off');
+                plt.lineplots();
                 plt.setLabels('all', 'Time [s]', 'Voltage [V]');
                 plt.setLimits('all', [0 1]);
                 obj.Plot = plt;

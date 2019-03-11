@@ -2,7 +2,6 @@ classdef Filbert < matlab.System
 
     % Public, non-tunable properties
     properties(Nontunable)
-        Capacity     = 1e8;
         SampleRate   = 512;
         
         A            = 0.39;
@@ -16,8 +15,6 @@ classdef Filbert < matlab.System
         
         LogFrequency = 4;
         IgnorBands   = [340 480; 720 890];
-        
-        Buffer
     end
 
     % Pre-computed constants
@@ -94,32 +91,27 @@ classdef Filbert < matlab.System
         function setupImpl(obj)
             buildCenterFrequencies(obj);
             buildSigmaFrequencies(obj);
-            obj.Buffer = dsp.AsyncBuffer(obj.Capacity);
         end
 
         function y = stepImpl(obj,u)
             % Initialize Variables 
-            fs     = obj.SampleRate;
-            cf     = obj.CenterFrequencies;
-            n_cf   = obj.nCenterFrequencies;
-            sd     = obj.SigmaRootTwo;
-            buffer = obj.Buffer;
-            y = [];
+            fs   = obj.SampleRate;
+            cf   = obj.CenterFrequencies;
+            n_cf = obj.nCenterFrequencies;
+            sd   = obj.SigmaRootTwo;
             
-            % Check Total Samples
-            write(buffer, u);
-            bn = buffer.NumUnreadSamples;
-            if bn > 1
-                x = read(buffer, bn - mod(bn,2));
-                [s, c] = size(x);
+            % Check Total Samples            
+            [s, c] = size(u);
+            h = zeros(s,c);
+            if mod(u,2) == 0
+                % Even Number of Samples
+                h([1 s/2+1],:) = 1;
+                h(2:s/2)       = 2;
             else
-                return
+                % Odd Number of Samples
+                h(1)         = 1; 
+                h(2:(s+1)/2) = 2;
             end
-            
-            % Even Number of Samples
-            h              = zeros(s,c);
-            h([1 s/2+1],:) = 1;
-            h(2:s/2)       = 2;
             
             % Create Frequency Range
             pf   = (0:s/2).* (fs/s);
@@ -127,21 +119,18 @@ classdef Filbert < matlab.System
             
             % Calculate Hilbert
             y  = NaN(s, c, n_cf);
-            fx = fft(x,s,1);
+            fx = fft(u,s,1);
             for i = 1:n_cf
                 k = (pf-cf(i))./sd(i);
                 
-                coef               = zeros(s, c);
-                coef(1:n_pf, :)    = exp( -0.5.* k.^2);
+                coef               = zeros(s,c);
+                coef(1:n_pf,:)     = exp(-0.5.* k.^2);
                 coef(n_pf+1:end,:) = flipud(coef(2:s/2,:));
                 coef(1,:)          = 0;
                 
+                % [Sample, Channel, Frequency]
                 y(:,:,i) = ifft(fx.*(coef.*h), s);
             end
-        end
-
-        function resetImpl(obj)
-            obj.Buffer.reset();
         end
     end
 end

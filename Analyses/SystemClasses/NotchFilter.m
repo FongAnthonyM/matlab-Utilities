@@ -12,6 +12,9 @@ classdef NotchFilter < matlab.System
         CenterFrequency = 60;
         Cascade         = 'manual';
         
+        DataStructPresent = false; 
+        DataStruct
+        
         PlotPresent     = false;
         ChannelMap      = [];
         Plot
@@ -32,6 +35,18 @@ classdef NotchFilter < matlab.System
         function obj = NotchFilter(varargin)
             % Support name-value pair arguments when constructing object
             setProperties(obj,nargin,varargin{:})
+            if ~isempty(obj.DataStruct)
+                obj.DataStructPresent = true;
+            end
+        end
+        
+        function setDataStruct(obj, ds)
+            obj.DataStruct = ds;
+            if ~isempty(ds)
+                obj.DataStructPresent = true;
+            else
+                obj.DataStructPresent = false;
+            end
         end
         
         function plt = buildPlot(obj, names, map, override)
@@ -44,6 +59,7 @@ classdef NotchFilter < matlab.System
             
             if override || isempty(obj.Plot)
                 plt = realmultiplot([600 length(names)*150], names, 'Name', 'Notch', 'Visible', 'off');
+                plt.lineplots();
                 plt.setLabels('all', 'Time [s]', 'Voltage [V]');
                 plt.setLimits('all', [0 1]);
                 obj.Plot = plt;
@@ -86,6 +102,10 @@ classdef NotchFilter < matlab.System
             map    = obj.ChannelMap;
             for index = 1:n_harm
                 u = filts{index}(u);
+            end
+            if obj.DataStructPresent
+                [sam, cha] = size(u);
+                self.DataStruct.appendDataNaNList(mat2cell(u,sam,ones(1,cha)),1);
             end
             if obj.PlotPresent
                 obj.Plot(u, time, map);

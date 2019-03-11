@@ -160,12 +160,32 @@ classdef datastruct < matlab.mixin.SetGet
             end
         end
         
+        function appendDataType(self, data, d)
+            fields = fieldnames(data);
+            for t = 1:length(fields)
+                type = fields{t};
+                for c = 1:length(self.Struct.(type))
+                    self.Struct.(type)(c).appendData(data.(type){c}, d);
+                end
+            end
+        end
+        
         function appendDataNaNList(self, data, d)
             if ~iscell(data)
                 data = {data};
             end
             for i = 1:self.Length
                 self.List(i).appendDataNaN(data{i}, d);
+            end
+        end
+        
+        function appendDataNaNType(self, data, d)
+            fields = fieldnames(data);
+            for t = 1:length(fields)
+                type = fields{t};
+                for c = 1:length(self.Struct.(type))
+                    self.Struct.(type)(c).appendDataNaN(data.(type){c}, d);
+                end
             end
         end
         

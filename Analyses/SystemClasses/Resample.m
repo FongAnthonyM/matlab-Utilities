@@ -20,6 +20,9 @@ classdef Resample < matlab.System
         
         Capacity     = 1e5;
         
+        DataStructPresent = false; 
+        DataStruct
+        
         PlotPresent  = false;
         ChannelMap   = [];
         Plot
@@ -45,6 +48,18 @@ classdef Resample < matlab.System
         function obj = Resample(varargin)
             % Support name-value pair arguments when constructing object
             setProperties(obj,nargin,varargin{:})
+            if ~isempty(obj.DataStruct)
+                obj.DataStructPresent = true;
+            end
+        end
+        
+        function setDataStruct(obj, ds)
+            obj.DataStruct = ds;
+            if ~isempty(ds)
+                obj.DataStructPresent = true;
+            else
+                obj.DataStructPresent = false;
+            end
         end
         
         function plt = buildPlot(obj, names, map, override)
@@ -57,6 +72,7 @@ classdef Resample < matlab.System
             
             if override || isempty(obj.Plot)
                 plt = realmultiplot([600 length(names)*150], names, 'Name', 'Resample', 'Visible', 'off');
+                plt.lineplots();
                 plt.setLabels('all', 'Time [s]', 'Voltage [V]');
                 plt.setLimits('all', [0 1]);
                 obj.Plot = plt;
@@ -149,7 +165,12 @@ classdef Resample < matlab.System
                     y = y(obj.pDelay+1:end, :);
                     obj.FirstOffset = false;
                 end
-
+                
+                if obj.DataStructPresent
+                    [sam, cha] = size(y);
+                    self.DataStruct.appendDataNaNList(mat2cell(y,sam,ones(1,cha)),1);
+                end
+                
                 if obj.PlotPresent
                     obj.Plot(y, time, map);
                 end

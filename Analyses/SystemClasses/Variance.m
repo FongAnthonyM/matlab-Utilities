@@ -31,6 +31,7 @@ classdef Variance < matlab.System
             
             if override || isempty(obj.CoherencePlot)
                 plt = realmultiplot([600 length(names)*150], names, 'Name', 'Variance', 'Visible', 'off');
+                plt.lineplots();
                 plt.setLabels('all', 'Time [s]', 'Voltage [V]');
                 plt.setLimits('all', [0 1], [0 1]);
                 plt.pointText(true);
@@ -52,6 +53,7 @@ classdef Variance < matlab.System
             
             if override || isempty(obj.AveragePlot)
                 plt = realmultiplot([600 length(names)*300], names, 'Name', 'Variance', 'Visible', 'off');
+                plt.lineplots();
                 plt.setLabels('all', 'Time [s]', 'Variance');
                 plt.setLimits('all', [0 1]);
                 plt.pointText(true);

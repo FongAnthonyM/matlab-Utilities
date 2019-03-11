@@ -17,19 +17,54 @@ classdef realmultiplot < scrollmultiplot & matlab.System
         % Constructor
         function obj = realmultiplot(varargin)
             % Support name-value pair arguments when constructing object
-            obj@scrollmultiplot(varargin{:});
-            obj.defaultFigures(); 
+            obj@scrollmultiplot(varargin{:}); 
         end
         
-        function defaultFigures(obj)
+        function lineplots(obj)
             temp = figure('Visible','off');
             animeline = animatedline('MaximumNumPoints',obj.MaxPoints);
             ptext = text(0, 0, ' ', 'Color', 'b', 'Visible', 'off');
             g_names = {'animeline', 'ptext'};
             g_parts = {animeline, ptext};
+            
             obj.addGraphics('all', g_names, g_parts);
             close(temp);
             obj.Plots = obj.plots;
+        end
+        
+        function last = addLinePlotData(obj, u, index, time, mapping)
+            if mapping 
+                u_ch = u(:, map(index(1),index(2)));
+            else
+                u_ch = u{index(1), index(2)};
+            end
+            %y_ch = resample(y{index}, 1, rs_factor);
+            x_ds = linspace(time(1), time(2), length(u_ch));
+            obj.Plots(index(1), index(2)).animeline.addpoints(x_ds, u_ch);
+            last = u_ch(end);
+        end
+        
+        function spectrograms(obj, x, y)
+            temp = figure('Visible','off');
+            spectro = pcolor(x, y, zeros(length(x),length(y)));
+            ptext = text(0, 0, ' ', 'Color', 'b', 'Visible', 'off');
+            g_names = {'spectro', 'ptext'};
+            g_parts = {spectro, ptext};
+            obj.addGraphics('all', g_names, g_parts);
+            close(temp);
+            obj.Plots = obj.plots;
+        end
+        
+        function last = addSpectrogramData(obj, u, index, time, mapping)
+            if mapping 
+                u_ch = u(:, :, map(index(1),index(2)));
+            else
+                u_ch = u{index(1), index(2)};
+            end
+            %y_ch = resample(y{index}, 1, rs_factor);
+            x_ds = linspace(time(1), time(2), length(u_ch));
+            obj.Plots(index(1), index(2)).animeline.addpoints(x_ds, u_ch);
+            last = u_ch(end);
         end
         
         function setPlotEnds(self, lims)
@@ -89,17 +124,10 @@ classdef realmultiplot < scrollmultiplot & matlab.System
             
             for i = 1:shape(1)
                 for j = 1:shape(2)
-                    if mapping 
-                        u_ch = u(:,map(i, j));
-                    else
-                        u_ch = u{i,j};
-                    end
-                    %y_ch = resample(y{index}, 1, rs_factor);
-                    x_ds = linspace(start, stop, length(u_ch));
-                    obj.Plots(i,j).animeline.addpoints(x_ds, u_ch);
+                    last = obj.addLinePlotData(u, [i,j], time, mapping);
                     if txt
-                        set(obj.Plots(i,j).ptext, 'Position', [time u_ch(end)]);
-                        set(obj.Plots(i,j).ptext, 'String', ['\leftarrow ' sprintf('%2.4f', u_ch(end))]);
+                        set(obj.Plots(i,j).ptext, 'Position', [time last]);
+                        set(obj.Plots(i,j).ptext, 'String', ['\leftarrow ' sprintf('%2.4f', last)]);
                     end
                     if track 
                         xlim(obj.Plots(i,j).subplot, [start-bof stop+aof]);

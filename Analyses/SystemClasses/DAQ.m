@@ -9,6 +9,9 @@ classdef DAQ < matlab.System
         Device
         IDs
         
+        DataStructPresent = false; 
+        DataStruct
+        
         PlotPresent   = false;
         ChannelMap    = [];
         Plot
@@ -19,6 +22,9 @@ classdef DAQ < matlab.System
         function obj = DAQ(varargin)
             % Support name-value pair arguments when constructing object
             setProperties(obj,nargin,varargin{:})
+            if ~isempty(obj.DataStruct)
+                obj.DataStructPresent = true;
+            end
         end
         
         function plt = buildPlot(obj, names, map, override)
@@ -28,6 +34,7 @@ classdef DAQ < matlab.System
             
             if override || isempty(obj.Plot)
                 plt = realmultiplot([600 length(names)*150], names, 'Name', obj.Name, 'Visible', 'off');
+                plt.lineplots();
                 plt.setLabels('all', 'Time [s]', 'Voltage [V]');
                 plt.setLimits('all', [0 1]);
                 obj.Plot = plt;
@@ -36,6 +43,15 @@ classdef DAQ < matlab.System
                 plt = obj.Plot;
             end
             obj.PlotPresent = true;
+        end
+        
+        function setDataStruct(obj, ds)
+            obj.DataStruct = ds;
+            if ~isempty(ds)
+                obj.DataStructPresent = true;
+            else
+                obj.DataStructPresent = false;
+            end
         end
         
         function plotTracking(obj, t)
@@ -59,10 +75,6 @@ classdef DAQ < matlab.System
 
     methods(Access = protected)
         %% Common functions
-%         function setupImpl(obj)
-%             
-%         end
-
         function [y, ts] = stepImpl(obj, timestamps)
             map = obj.ChannelMap;
             y = [];
@@ -77,7 +89,13 @@ classdef DAQ < matlab.System
                 return
             end
             
-            y = cell2mat(r_array.');
+            y = cell2mat(r_array).';
+            
+            if obj.DataStructPresent
+                f_sn = ts.b_adj_sn;
+                l_sn = ts.e_adj_sn;
+                self.DataStruct.addDataList(r_array,f_sn:l_sn);
+            end
             
             if obj.PlotPresent
                 obj.Plot(r_array.', start, stop, map)
