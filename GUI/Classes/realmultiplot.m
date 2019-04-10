@@ -32,7 +32,7 @@ classdef realmultiplot < scrollmultiplot & matlab.System
             obj.Plots = obj.plots;
         end
         
-        function last = addLinePlotData(obj, u, index, time, mapping)
+        function last = addLinePlotData(obj, u, index, time, mapping, map)
             if mapping 
                 u_ch = u(:, map(index(1),index(2)));
             else
@@ -100,6 +100,7 @@ classdef realmultiplot < scrollmultiplot & matlab.System
         function stepImpl(obj, u, time, map)
             if nargin < 3 || isempty(map)
                 mapping = false;
+                map = [];
             else
                 mapping = true;
             end
@@ -124,7 +125,7 @@ classdef realmultiplot < scrollmultiplot & matlab.System
             
             for i = 1:shape(1)
                 for j = 1:shape(2)
-                    last = obj.addLinePlotData(u, [i,j], time, mapping);
+                    last = obj.addLinePlotData(u, [i,j], time, mapping, map);
                     if txt
                         set(obj.Plots(i,j).ptext, 'Position', [time last]);
                         set(obj.Plots(i,j).ptext, 'String', ['\leftarrow ' sprintf('%2.4f', last)]);

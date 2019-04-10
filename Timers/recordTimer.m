@@ -73,7 +73,7 @@ methods
         self.info_log = info_log;
         self.period   = period;
         
-        if nargin >= 5
+        if nargin >= 4
             self.process = process;
         end
     end

@@ -213,7 +213,7 @@ methods
         if self.trigger == 1
             self.UDP.delete();
         end
-        if ~empty(self.server_fig)
+        if ~isempty(self.server_fig)
             close(self.server_fig)
         end
     end

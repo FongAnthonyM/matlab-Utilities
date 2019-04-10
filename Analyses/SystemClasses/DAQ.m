@@ -94,16 +94,12 @@ classdef DAQ < matlab.System
             if obj.DataStructPresent
                 f_sn = ts.b_adj_sn;
                 l_sn = ts.e_adj_sn;
-                self.DataStruct.addDataList(r_array,f_sn:l_sn);
+                obj.DataStruct.addDataList(r_array,f_sn:l_sn);
             end
             
             if obj.PlotPresent
                 obj.Plot(r_array.', start, stop, map)
             end
-        end
-
-        function resetImpl(obj)
-            
         end
     end
 end

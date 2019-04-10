@@ -77,6 +77,7 @@ classdef Coprand < matlab.System
             
             if override || isempty(obj.CoherencePlot)
                 plt = realmultiplot([600 length(names)*150], names, 'Name', 'Coherence', 'Visible', 'off');
+                plt.lineplots();
                 plt.setLabels('all', 'Time [s]', 'Coherence');
                 plt.setLimits('all', [0 1], [0 1]);
                 plt.pointText(true);
