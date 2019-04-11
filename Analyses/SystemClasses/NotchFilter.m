@@ -105,7 +105,7 @@ classdef NotchFilter < matlab.System
             end
             if obj.DataStructPresent
                 [sam, cha] = size(u);
-                self.DataStruct.appendDataNaNList(mat2cell(u,sam,ones(1,cha)),1);
+                obj.DataStruct.appendDataNaNList(mat2cell(u,sam,ones(1,cha)),1);
             end
             if obj.PlotPresent
                 obj.Plot(u, time, map);

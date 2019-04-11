@@ -29,8 +29,10 @@ classdef CAR < matlab.System
             pairs = struct;
             for r = 1:length(tg_names)
                 pairs(r).target.name = tg_names{r};
-                pairs(r).reference.name = rf_names{r};
+                pairs(r).target.len = length(tg_list{r});
                 pairs(r).target.channels = tg_list{r};
+                pairs(r).reference.name = rf_names{r};
+                pairs(r).reference.len = length(rf_list{r});
                 pairs(r).reference.channels = rf_list{r};
             end
         end
@@ -69,8 +71,10 @@ classdef CAR < matlab.System
             pairs = struct;
             for r = 1:length(tg_names)
                 pairs(r).target.name = tg_names{r};
-                pairs(r).reference.name = rf_names{r};
+                pairs(r).target.len = length(tg_list{r});
                 pairs(r).target.channels = tg_list{r};
+                pairs(r).reference.name = rf_names{r};
+                pairs(r).reference.len = length(rf_list{r});
                 pairs(r).reference.channels = rf_list{r};
             end
             obj.Pairs = pairs;
@@ -119,8 +123,8 @@ classdef CAR < matlab.System
             pairs  = obj.Pairs;
             m_chan = obj.mChan;
             for p = 1:obj.nPairs
-                tg = length(pairs{p,1});
-                rf = length(pairs{p,2});
+                tg = pairs(p).target.len;
+                rf = pairs(p).reference.len;
                 obj.Possible(p) = tg+rf > m_chan;
             end
         end
@@ -133,21 +137,11 @@ classdef CAR < matlab.System
             if obj.Allow
                 [y, ds] = obj.car(u, pairs);
                 if obj.DataStructPresent
-                    self.DataStruct.appendDataNaNType(ds, 1);
+                    obj.DataStruct.appendDataNaNType(ds, 1);
                 end
                 if obj.PlotPresent
-                    obj.Plot(y, time, map)
+                    obj.Plot(y, time, map);
                 end
-            end
-        end
-
-        function resetImpl(obj)
-            pairs  = obj.Pairs;
-            m_chan = obj.mChan;
-            for p = 1:obj.nPairs
-                tg = length(pairs{p,1});
-                rf = length(pairs{p,2});
-                obj.Possible(p) = tg+rf > m_chan;
             end
         end
     end

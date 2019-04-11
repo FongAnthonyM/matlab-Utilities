@@ -168,7 +168,7 @@ classdef Resample < matlab.System
                 
                 if obj.DataStructPresent
                     [sam, cha] = size(y);
-                    self.DataStruct.appendDataNaNList(mat2cell(y,sam,ones(1,cha)),1);
+                    obj.DataStruct.appendDataNaNList(mat2cell(y,sam,ones(1,cha)),1);
                 end
                 
                 if obj.PlotPresent

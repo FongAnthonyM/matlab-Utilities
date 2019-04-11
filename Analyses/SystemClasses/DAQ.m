@@ -89,7 +89,7 @@ classdef DAQ < matlab.System
                 return
             end
             
-            y = cell2mat(r_array).';
+            y = cell2mat(r_array.').';
             
             if obj.DataStructPresent
                 f_sn = ts.b_adj_sn;
@@ -98,7 +98,7 @@ classdef DAQ < matlab.System
             end
             
             if obj.PlotPresent
-                obj.Plot(r_array.', start, stop, map)
+                obj.Plot(r_array.', start, stop, map);
             end
         end
     end

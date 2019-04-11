@@ -6,6 +6,7 @@ classdef realmultiplot < scrollmultiplot & matlab.System
         MaxPoints = 1e4;
         Text      = false;
         Track     = true;
+        Pfunc     = [];
     end
 
     % Pre-computed constants
@@ -30,6 +31,7 @@ classdef realmultiplot < scrollmultiplot & matlab.System
             obj.addGraphics('all', g_names, g_parts);
             close(temp);
             obj.Plots = obj.plots;
+            obj.Pfunc = @obj.addLinePlotData;
         end
         
         function last = addLinePlotData(obj, u, index, time, mapping, map)
@@ -53,9 +55,10 @@ classdef realmultiplot < scrollmultiplot & matlab.System
             obj.addGraphics('all', g_names, g_parts);
             close(temp);
             obj.Plots = obj.plots;
+            obj.Pfunc = @obj.addSpectrogramData;
         end
         
-        function last = addSpectrogramData(obj, u, index, time, mapping)
+        function last = addSpectrogramData(obj, u, index, time, mapping, map)
             if mapping 
                 u_ch = u(:, :, map(index(1),index(2)));
             else
@@ -125,7 +128,7 @@ classdef realmultiplot < scrollmultiplot & matlab.System
             
             for i = 1:shape(1)
                 for j = 1:shape(2)
-                    last = obj.addLinePlotData(u, [i,j], time, mapping, map);
+                    last = obj.Pfunc(u, [i,j], time, mapping, map);
                     if txt
                         set(obj.Plots(i,j).ptext, 'Position', [time last]);
                         set(obj.Plots(i,j).ptext, 'String', ['\leftarrow ' sprintf('%2.4f', last)]);
