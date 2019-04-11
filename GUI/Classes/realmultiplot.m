@@ -41,9 +41,14 @@ classdef realmultiplot < scrollmultiplot & matlab.System
                 u_ch = u{index(1), index(2)};
             end
             %y_ch = resample(y{index}, 1, rs_factor);
-            x_ds = linspace(time(1), time(2), length(u_ch));
+            if length(u_ch) == 1
+                x_ds = time(1);
+                last = u_ch;
+            else
+                x_ds = linspace(time(1), time(2), length(u_ch));
+                last = u_ch(end);
+            end
             obj.Plots(index(1), index(2)).animeline.addpoints(x_ds, u_ch);
-            last = u_ch(end);
         end
         
         function spectrograms(obj, x, y)
