@@ -171,14 +171,14 @@ methods
             catch
             end
         else
+            disp('Stimulation Triggered but stimulation is off.')
             if isfield(self.inputs, 'record_data')
-                [~, a_ts] = collectData(self.inputs.record_data);
-                l_sn = a_ts.e_sample_number;
+                [~, a_ts] = self.inputs.record_data.collectData();
             else
-                l_sn = [];
+                a_ts = [];
             end
             un_now = datetime();
-            new_timestamp = beginTimestamp(self, l_sn, un_now);
+            new_timestamp = self.beginTimestamp(a_ts, un_now);
             addTimestamp(self.timestamps, new_timestamp);
         end
     end

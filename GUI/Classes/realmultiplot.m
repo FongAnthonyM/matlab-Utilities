@@ -3,6 +3,7 @@ classdef realmultiplot < scrollmultiplot & matlab.System
     properties
         Bmin      = 1;
         Amin      = 1;
+        Vfra      = 0.1;
         MaxPoints = 1e4;
         Text      = false;
         Track     = true;
@@ -10,7 +11,7 @@ classdef realmultiplot < scrollmultiplot & matlab.System
     end
 
     % Pre-computed constants
-    properties(Access = private)
+    properties(Access = protected)
         Plots
     end
 
@@ -49,30 +50,6 @@ classdef realmultiplot < scrollmultiplot & matlab.System
                 last = u_ch(end);
             end
             obj.Plots(index(1), index(2)).animeline.addpoints(x_ds, u_ch);
-        end
-        
-        function spectrograms(obj, x, y)
-            temp = figure('Visible','off');
-            spectro = pcolor(x, y, zeros(length(x),length(y)));
-            ptext = text(0, 0, ' ', 'Color', 'b', 'Visible', 'off');
-            g_names = {'spectro', 'ptext'};
-            g_parts = {spectro, ptext};
-            obj.addGraphics('all', g_names, g_parts);
-            close(temp);
-            obj.Plots = obj.plots;
-            obj.Pfunc = @obj.addSpectrogramData;
-        end
-        
-        function last = addSpectrogramData(obj, u, index, time, mapping, map)
-            if mapping 
-                u_ch = u(:, :, map(index(1),index(2)));
-            else
-                u_ch = u{index(1), index(2)};
-            end
-            %y_ch = resample(y{index}, 1, rs_factor);
-            x_ds = linspace(time(1), time(2), length(u_ch));
-            obj.Plots(index(1), index(2)).animeline.addpoints(x_ds, u_ch);
-            last = u_ch(end);
         end
         
         function setPlotEnds(self, lims)
@@ -127,7 +104,7 @@ classdef realmultiplot < scrollmultiplot & matlab.System
             b_min = obj.Bmin;
             a_min = obj.Amin;
             
-            offset = (stop - start)*.10;
+            offset = (stop - start)*obj.Vfra;
             bof = max([offset b_min]);
             aof = max([offset a_min]);
             
@@ -138,7 +115,7 @@ classdef realmultiplot < scrollmultiplot & matlab.System
                         set(obj.Plots(i,j).ptext, 'Position', [time last]);
                         set(obj.Plots(i,j).ptext, 'String', ['\leftarrow ' sprintf('%2.4f', last)]);
                     end
-                    if track 
+                    if track && ~isempty(last)
                         xlim(obj.Plots(i,j).subplot, [start-bof stop+aof]);
                     end
                 end

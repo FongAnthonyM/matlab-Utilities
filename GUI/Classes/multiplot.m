@@ -158,13 +158,15 @@ methods
         for i = m
             for j = n
                 parent = self.plots(i,j).subplot;
-                xlabel(parent, x)
-                ylabel(parent, y)
-                if nargin > 4
-                    parent.XTick = xt;
-                end
-                if nargin > 5
-                    parent.YTick = yt;
+                if ~isempty(parent)
+                    xlabel(parent, x)
+                    ylabel(parent, y)
+                    if nargin > 4
+                        parent.XTick = xt;
+                    end
+                    if nargin > 5
+                        parent.YTick = yt;
+                    end
                 end
             end
         end
@@ -183,9 +185,11 @@ methods
         for i = m
             for j = n
                 parent = self.plots(i,j).subplot;
-                xlim(parent, x);
-                if nargin > 3
-                    ylim(parent, y);
+                if ~isempty(parent)
+                    xlim(parent, x);
+                    if nargin > 3
+                        ylim(parent, y);
+                    end
                 end
             end
         end

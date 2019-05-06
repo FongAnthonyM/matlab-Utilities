@@ -524,6 +524,13 @@ methods
         end
     end
     
+    function endStim(self)
+        if self.trigger == 1
+            packet = zeros(1,24);
+            self.UDP.sendDatagram([self.s_header 0 packet]);
+        end
+    end
+    
     function startStimulation(self, p_index)
     % startStimulation
     %   Starts stimulation on the TDT

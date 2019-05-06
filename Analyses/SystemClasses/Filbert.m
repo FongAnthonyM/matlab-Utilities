@@ -15,13 +15,13 @@ classdef Filbert < matlab.System
         
         LogFrequency = 4;
         IgnorBands   = [340 480; 720 890];
+        
+        CenterFrequencies
+        nCenterFrequencies
     end
 
     % Pre-computed constants
     properties(Access = private)
-        CenterFrequencies
-        nCenterFrequencies
-        
         SigmaFrequencies 
         SigmaRootTwo
     end
@@ -106,15 +106,15 @@ classdef Filbert < matlab.System
             if mod(u,2) == 0
                 % Even Number of Samples
                 h([1 s/2+1],:) = 1;
-                h(2:s/2)       = 2;
+                h(2:s/2,:)     = 2;
             else
                 % Odd Number of Samples
-                h(1)         = 1; 
-                h(2:(s+1)/2) = 2;
+                h(1,:)         = 1; 
+                h(2:(s+1)/2,:) = 2;
             end
             
             % Create Frequency Range
-            pf   = (0:s/2).* (fs/s);
+            pf   = (0:floor(s/2)).*(fs/s);
             n_pf = length(pf);
             
             % Calculate Hilbert
@@ -123,13 +123,14 @@ classdef Filbert < matlab.System
             for i = 1:n_cf
                 k = (pf-cf(i))./sd(i);
                 
-                coef               = zeros(s,c);
-                coef(1:n_pf,:)     = exp(-0.5.* k.^2);
-                coef(n_pf+1:end,:) = flipud(coef(2:s/2,:));
-                coef(1,:)          = 0;
+                coef               = zeros(s,1);
+                coef(1:n_pf)     = exp(-0.5.* k.^2);
+                coef(n_pf+1:end) = flipud(coef(2:ceil(s/2)));
+                coef(1)          = 0;
+                coe              = repmat(coef,1,c);
                 
                 % [Sample, Channel, Frequency]
-                y(:,:,i) = ifft(fx.*(coef.*h), s);
+                y(:,:,i) = ifft(fx.*(coe.*h), s);
             end
         end
     end

@@ -89,8 +89,8 @@ methods
         end
     end
     
-    function setData(self, d)
-        self.data = d;
+    function setData(self, data)
+        self.data = data;
         self.indicies;
     end
     
@@ -99,32 +99,32 @@ methods
         self.data(index{:}) = d;
     end
     
-    function appendData(self, d, dim)
-        d_size = size(d);
+    function appendData(self, data, dim)
+        d_size = size(data);
         index = self.indicies;
         if isempty(index) || dim > size(index,2)+1
             for i = 1:length(d_size)
                 index{i} = 1:d_size(i);
             end
-            index{dim} = (1:size(d, dim));
+            index{dim} = (1:size(data, dim));
         elseif dim == size(index,2)+1
-            index{dim} = (2:size(d, dim)+1);
+            index{dim} = (2:size(data, dim)+1);
         elseif dim <= size(index,2)
-            index{dim} = index{dim}(end)+(1:size(d, dim));
+            index{dim} = index{dim}(end)+(1:size(data, dim));
         end
-        self.data(index{:}) = d;
+        self.data(index{:}) = data;
     end
     
-    function appendDataNaN(self, d, dim)
+    function appendDataNaN(self, data, dim)
         index = self.NaNindicies;
         if isempty(index) || dim > size(index,2)+1
-            index{dim} = (1:size(d,dim));
+            index{dim} = (1:size(data,dim));
         elseif dim == size(index,2)+1
-            index{dim} = (2:size(d, dim)+1);
+            index{dim} = (2:size(data, dim)+1);
         elseif dim <= size(index,2)
-            index{dim} = index{dim}(end)+(1:size(d, dim));
+            index{dim} = index{dim}(end)+(1:size(data, dim));
         end
-        self.data(index{:}) = d;
+        self.data(index{:}) = data;
     end
     
     function d = getData(self, s)
@@ -132,17 +132,17 @@ methods
         d = self.data(index{:});
     end
     
-    function clearData(self, d, d_s)
+    function clearData(self, data, d_s)
     % clearData
     %   Clears data in Data and Data_set or relpaces it 
     %   Inputs
     %   :self:      handle      A handle that points to the signal object
     %   :data:		matrix		Optional data to relpace data
         if nargin == 2
-            self.data = d;
+            self.data = data;
             self.data_set = {};
         elseif nargin == 3
-            self.data = d;
+            self.data = data;
             self.data_set = d_s;
         else
             self.data = [];
@@ -174,8 +174,12 @@ methods
         end
     end
     
-    function s = size(self)
-        s = size(self.data);
+    function s = size(self, d)
+        if nargin == 2 && ~isempty(d)
+            s = size(self.data, d);
+        else
+            s = size(self.data);
+        end
     end
     
     function s = NaNsize(self)
